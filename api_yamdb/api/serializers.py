@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from reviews.models import Category, Genre, Title
+from users.models import User
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -32,7 +33,7 @@ class TitleSerializer(serializers.ModelSerializer):
 
 class ReadOnlyTitleSerializer(serializers.ModelSerializer):
     rating = serializers.IntegerField(
-        source = 'reviews__score__avg', red_only=True
+        source = 'reviews__score__avg', read_only=True
     )
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
@@ -44,3 +45,13 @@ class ReadOnlyTitleSerializer(serializers.ModelSerializer):
 
 class GenreTitleSerializer(serializers.ModelSerializer):
     pass
+
+
+class SignUpSerializer(serializers.ModelSerializer):
+
+    username = serializers.SlugField(required=True)
+    confirmation_code = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'confirmation_code')

@@ -6,7 +6,7 @@ from rest_framework.routers import DefaultRouter
 # from .views import TitleViewSet
 # from .views import ReviewViewSet
 # from .views import CommentViewSet
-# from .views import register
+from .views import register
 # from .views import get_jwt_token
 
 
@@ -24,6 +24,6 @@ urlpatterns = [
 #    path('v1/', include('djoser.urls')),
 #    path('v1/', include('djoser.urls.jwt')),
     path('v1/', include(router.urls)),
-#    path('v1/auth/signup/', register, name='register'),
+    path('v1/auth/signup/', register, name='register'),
 #    path('v1/auth/token/', get_jwt_token, name='token')
 ]

@@ -3,10 +3,11 @@
 # from api.serializers import CategorySerializer
 import string
 import random
-from django.core.mail import send_mail  # Импорт для отправки сообщений
-from rest_framework import status  # Импортировали статусы
-from rest_framework.decorators import api_view  # Импортировали декоратор
-from rest_framework.response import Response  # Импортировали класс Response
+from django.core.mail import send_mail  # отправка сообщений
+from rest_framework import status  # статусы
+from rest_framework.decorators import api_view, permission_classes  # декоратор
+from rest_framework.permissions import AllowAny  # разрешения
+from rest_framework.response import Response
 from users.models import User
 from .serializers import SignUpSerializer
 # from rest_framework import viewsets(ListCreateDestroyViewSet)
@@ -24,6 +25,7 @@ from .serializers import SignUpSerializer
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def register(request):
     if request.method == 'POST':
         # User.objects.all().delete()

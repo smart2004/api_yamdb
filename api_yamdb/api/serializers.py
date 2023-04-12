@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from reviews.models import Review, Comment
+from reviews.models import Comment, Review
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -33,3 +33,11 @@ class ReviewSerializer(serializers.ModelSerializer):
                 message='Вы уже написали отзыв к данному произведению'
             )
         ]
+
+    def get_rating(self, obj):
+        reviews = Review.objects.filter(title=obj.title)
+        if reviews:
+            total_score = sum([review.score for review in reviews])
+            rating = total_score / len(reviews)
+            return round(rating, 2)
+        return None

@@ -1,10 +1,9 @@
 from django.shortcuts import get_object_or_404
-from reviews.models import Review
-from users.models import User
+from django.db.models import Avg
+from reviews.models import Review, Title
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.response import Response
 
 from .permissions import IsOwnerOrReadOnly
 from .serializers import ReviewSerializer, CommentSerializer
@@ -18,6 +17,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+        title_id = self.request.data.get('title')
+        reviews = Review.objects.filter(title_id=title_id)
+        rating = reviews.aggregate(Avg('score'))['score__avg']
+        Title.objects.filter(id=title_id).update(rating=rating)
 
 
 class CommentViewSet(viewsets.ModelViewSet):

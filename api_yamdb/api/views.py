@@ -52,7 +52,7 @@ def register(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def get_jwt_token(request):
     if request.method == 'POST':
         serializer = TokenSerializer(data=request.data)
@@ -71,7 +71,7 @@ def get_jwt_token(request):
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def test(request):
     if request.method == 'GET':
         return Response({'message': 'Only token, good work'})

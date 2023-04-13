@@ -29,7 +29,7 @@ from .serializers import SignUpSerializer, TokenSerializer
 @permission_classes([AllowAny])
 def register(request):
     if request.method == 'POST':
-        # User.objects.all().delete()
+        User.objects.all().delete()
         serializer = SignUpSerializer(data=request.data)
         if serializer.is_valid():
             letters = string.ascii_letters  # upper and lower

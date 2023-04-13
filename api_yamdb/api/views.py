@@ -52,7 +52,7 @@ def register(request):
 
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def get_jwt_token(request):
     if request.method == 'POST':
         serializer = TokenSerializer(data=request.data)

@@ -66,8 +66,12 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 class TokenSerializer(serializers.ModelSerializer):
 
-    username = serializers.SlugField(required=True)
-    confirmation_code = serializers.SlugField(required=True)
+    username = serializers.CharField(
+        required=True,
+        max_length=150,
+        validators=[validate_username, ]
+    )
+    confirmation_code = serializers.CharField(required=True)
 
     class Meta:
         model = User

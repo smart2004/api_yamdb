@@ -69,10 +69,3 @@ def get_jwt_token(request):
                 status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def test(request):
-    if request.method == 'GET':
-        return Response({'message': 'Only token, good work'})

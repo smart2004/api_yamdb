@@ -6,8 +6,8 @@ from .views import GenreViewSet
 from .views import TitleViewSet
 from .views import ReviewViewSet
 from .views import CommentViewSet
-# from .views import register
-# from .views import get_jwt_token
+from .views import register
+from .views import get_jwt_token
 
 router = DefaultRouter()
 

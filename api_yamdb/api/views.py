@@ -1,31 +1,61 @@
-# from django.shortcuts import render
-# from reviews.models import Category
-# from api.serializers import CategorySerializer
 import string
 import random
+from django.shortcuts import render
+from django.db.models import Avg
+from reviews.models import Category, Genre, Title
+from api.serializers import CategorySerializer, GenreSerializer
+from api.mixins import ListCreateDestroyViewSet
+from api.serializers import(CategorySerializer, GenreSerializer,
+                            TitleSerializer, ReadOnlyTitleSerializer)
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, permissions, status, viewsets
+from api.filters import TitlesFilter
+from api.permissions import (IsAdmin, IsAdminOrReadOnly,
+                          IsAdminModeratorOwnerOrReadOnly)
+from rest_framework.pagination import PageNumberPagination
 from rest_framework_simplejwt.tokens import AccessToken
-from django.core.mail import send_mail  # отправка сообщений
-from django.shortcuts import get_object_or_404
 from rest_framework import status  # статусы
 from rest_framework.decorators import api_view, permission_classes  # декоратор
 from rest_framework.permissions import AllowAny, IsAuthenticated  # разрешения
 from rest_framework.response import Response
+from django.core.mail import send_mail  # отправка сообщений
+from django.shortcuts import get_object_or_404
 from users.models import User
 from .serializers import SignUpSerializer, TokenSerializer
-# from rest_framework import viewsets(ListCreateDestroyViewSet)
 
 
-# class CategoryViewSet(ListCreateDestroyViewSet):
-#     queryset = Category.objects.all()
-#     serializer_class = CategorySerializer
-#     search_fields = ('name',)
-#     lookup_field = 'slug'
+class CategoryViewSet(ListCreateDestroyViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ("name",)
+    lookup_field = "slug"
 
 
-# class GenreViewSet(ListCreateDestroyViewSet):
-#     pass
+class GenreViewSet(ListCreateDestroyViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ("name",)
+    lookup_field = "slug"
 
 
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all().annotate(
+        Avg("reviews__score")
+    ).order_by("name")
+    serializer_class = TitleSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TitlesFilter
+
+    def get_serializer_class(self):
+        if self.action in ("retrieve", "list"):
+            return ReadOnlyTitleSerializer
+        return TitleSerializer
+        
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register(request):

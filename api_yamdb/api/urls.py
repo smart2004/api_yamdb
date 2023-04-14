@@ -6,7 +6,7 @@ from rest_framework.routers import DefaultRouter
 # from .views import TitleViewSet
 # from .views import ReviewViewSet
 # from .views import CommentViewSet
-from .views import register, get_jwt_token, test
+from .views import register, get_jwt_token
 
 
 router = DefaultRouter()

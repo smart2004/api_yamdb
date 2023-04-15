@@ -2,7 +2,8 @@ from rest_framework import serializers
 
 from reviews.models import Category, Genre, Title, Review, Comment, User
 from rest_framework.exceptions import ValidationError
-from reviews.validators import validate_username
+from reviews.validators import validate_username, validate_confirmation_code
+from rest_framework.validators import UniqueValidator
 from rest_framework.generics import get_object_or_404
 
 
@@ -87,12 +88,17 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = '__all__'
+
+
 class SignUpSerializer(serializers.ModelSerializer):
 
     username = serializers.CharField(
         required=True,
         max_length=150,
-        validators=[validate_username, ]
+        validators=[
+            validate_username,
+            UniqueValidator(User.objects.all()),
+        ]
     )
     email = serializers.EmailField(
         required=True,
@@ -111,8 +117,64 @@ class TokenSerializer(serializers.ModelSerializer):
         max_length=150,
         validators=[validate_username, ]
     )
-    confirmation_code = serializers.CharField(required=True)
+    confirmation_code = serializers.CharField(
+        required=True,
+        max_length=20,
+        validators=[validate_confirmation_code, ]
+    )
 
     class Meta:
         model = User
         fields = ('username', 'confirmation_code')
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    username = serializers.CharField(
+        required=True,
+        max_length=150,
+        validators=[
+            validate_username,
+            UniqueValidator(User.objects.all()),
+        ]
+    )
+
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role'
+            )
+
+
+class AboutUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role'
+            )
+        lookup_field = 'username'
+
+
+class UserMeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role'
+            )

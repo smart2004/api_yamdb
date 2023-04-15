@@ -17,13 +17,15 @@ from api.permissions import (IsAdmin, IsAdminOrReadOnly,
 from rest_framework.pagination import PageNumberPagination
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework import status  # статусы
+from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes  # декоратор
 from rest_framework.permissions import AllowAny, IsAuthenticated  # разрешения
 from rest_framework.response import Response
 from django.core.mail import send_mail  # отправка сообщений
 from django.shortcuts import get_object_or_404
 from users.models import User
-from .serializers import SignUpSerializer, TokenSerializer
+from .serializers import SignUpSerializer, TokenSerializer, UserSerializer
+from .serializers import AboutUserSerializer, UserMeSerializer
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
@@ -86,12 +88,12 @@ class CommentViewSet(viewsets.ModelViewSet):
         review_id = self.kwargs.get('review_id')
         review = get_object_or_404(Review, id=review_id, title=title_id)
         serializer.save(author=self.request.user, review=review)
- 
+
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register(request):
     if request.method == 'POST':
-        User.objects.all().delete()
         serializer = SignUpSerializer(data=request.data)
         if serializer.is_valid():
             letters = string.ascii_letters  # upper and lower
@@ -118,15 +120,35 @@ def register(request):
 def get_jwt_token(request):
     if request.method == 'POST':
         serializer = TokenSerializer(data=request.data)
+        # get_object_or_404(User, username=request.data.get('username'))
         if serializer.is_valid():
-            queryset = User.objects.filter(
-                username=request.data['username'],
-                confirmation_code=request.data['confirmation_code']
-            )
-            user = get_object_or_404(queryset)
+            user = get_object_or_404(User, username=request.data['username'])
             access = AccessToken.for_user(user)
             return Response(
                 {'token': str(access)},
                 status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserList(generics.ListCreateAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAdmin, ]
+    queryset = User.objects.all()
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ("username",)
+
+
+class UserDetail(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = AboutUserSerializer
+    queryset = User.objects.all()
+    lookup_field = 'username'
+    permission_classes = [IsAdmin, ]
+
+
+class UserMe(generics.RetrieveUpdateAPIView):
+    serializer_class = UserMeSerializer
+    permission_classes = [AllowAny, ]
+
+    def get_queryset(self):
+        return User.objects.all()

@@ -21,43 +21,43 @@ Django Superusers — poses Administrator rights (Admin).
 
 The project has endpoints sections (with -requests | endpoints):
 
-#####AUTH
+##### AUTH
 ```
 (POST | http://127.0.0.1:8000/api/v1/auth/signup/), 
 (POST | http://127.0.0.1:8000/api/v1/auth/token/);
 ```
 
-#####CATEGORIES 
+##### CATEGORIES 
 ```
 (POST or GET | http://127.0.0.1:8000/api/v1/categories/), 
 (DELETE | http://127.0.0.1:8000/api/v1/categories/{slug}); 
 ```
 
-#####GENRES 
+##### GENRES 
 ```
 (POST or GET | http://127.0.0.1:8000/api/v1/genres/), 
 (DELETE | http://127.0.0.1:8000/api/v1/genres/{slug});
 ```
 
-#####TITLES 
+##### TITLES 
 ```
 (POST or GET | http://127.0.0.1:8000/api/v1/titles/), 
 (GET, PATCH, DELETE | http://127.0.0.1:8000/api/v1/titles/{titles_id}/);
 ```
 
-#####REVIEWS 
+##### REVIEWS 
 ```
 (POST or GET | http://127.0.0.1:8000/api/v1/titles/{title_id}/reviews/), 
 (GET, PATCH, DELETE | http://127.0.0.1:8000/api/v1/titles/{title_id}/reviews/{review_id}/);
 ```
 
-#####COMMENTS 
+##### COMMENTS 
 ```
 (POST or GET | http://127.0.0.1:8000/api/v1/titles/{title_id}/reviews/{review_id}/comments/),
 (GET, PATCH, DELETE | http://127.0.0.1:8000/api/v1/titles/{title_id}/reviews/{review_id}/comments/{comment_id}/);
 ```
 
-#####USERS 
+##### USERS 
 ```
 (POST or GET | http://127.0.0.1:8000/api/v1/users/), 
 (GET, PATCH, DELETE | http://127.0.0.1:8000/api/v1/users/{username}/),

@@ -142,7 +142,7 @@ def get_jwt_token(request):
         # get_object_or_404(User, username=request.data.get('username'))
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        get_object_or_404(User, username=request.data['username'])
+        get_object_or_404(User, username=request.data.get('username'))
         if not validate_confirmation_code(request.data['confirmation_code']):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         user = get_object_or_404(

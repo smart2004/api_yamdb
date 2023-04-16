@@ -27,10 +27,6 @@ def validate_username(username):
 
 def validate_confirmation_code(confirmation_code):
     if not isinstance(confirmation_code, str):
-        raise ValidationError(
-            'Confirmation code is string'
-        )
+        return False
     if len(confirmation_code) != 20:
-        raise ValidationError(
-            'Incorrect len of confirmation code'
-        )
+        return False

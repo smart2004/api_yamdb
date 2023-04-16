@@ -9,7 +9,6 @@ from .views import register
 from .views import get_jwt_token
 from .views import UserViewSet
 
-
 router = DefaultRouter()
 
 router.register(r'users', UserViewSet, basename='users')

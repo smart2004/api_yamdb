@@ -9,10 +9,10 @@ def validate_year(value):
             ('Input year %(value)s greater than current year!'),
             params={'value': value},
         )
-    
+
+
 def validate_username(username):
     if not bool(re.match(r'^[\w.@+-]+$', username)):
-#    if not bool(re.match(r'^[\w.@+-]+\z', username)):
         raise ValidationError(
             'Incorrect symbols in username.'
             'Use figures, letters and symbols: dot, @, +, -, _'
@@ -23,3 +23,10 @@ def validate_username(username):
             'It is prohibited to set username as me'
         )
     return username
+
+
+def validate_confirmation_code(confirmation_code):
+    if not isinstance(confirmation_code, str):
+        return False
+    if len(confirmation_code) != 20:
+        return False

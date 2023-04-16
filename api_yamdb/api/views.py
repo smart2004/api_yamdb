@@ -122,14 +122,16 @@ def get_jwt_token(request):
     if request.method == 'POST':
         serializer = TokenSerializer(data=request.data)
         # get_object_or_404(User, username=request.data.get('username'))
-        if serializer.is_valid():
-            user = get_object_or_404(User, username=request.data['username'])
-            access = AccessToken.for_user(user)
-            return Response(
-                {'token': str(access)},
-                status=status.HTTP_200_OK
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if not serializer.is_valid():
+            if User.objects.filter(username=request.data.get('username')).exists():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        user = get_object_or_404(User, username=request.data['username'])
+        access = AccessToken.for_user(user)
+        return Response(
+            {'token': str(access)},
+            status=status.HTTP_200_OK
+        )
 
 
 class UserViewSet(viewsets.ModelViewSet):

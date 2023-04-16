@@ -27,7 +27,7 @@ from users.models import User
 from .serializers import SignUpSerializer, TokenSerializer, UserSerializer
 # from .serializers import AboutUserSerializer, UserMeSerializer
 from .serializers import UserSerializer, UserEditSerializer
-
+from reviews.validators import validate_username, validate_confirmation_code
 
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
@@ -96,13 +96,19 @@ class CommentViewSet(viewsets.ModelViewSet):
 def register(request):
     if request.method == 'POST':
         serializer = SignUpSerializer(data=request.data)
-        if serializer.is_valid():
-            letters = string.ascii_letters  # upper and lower
-            confirmation_code = ''.join(
-                random.sample(
-                    letters,
-                    User._meta.get_field('confirmation_code').max_length
-                )
+        letters = string.ascii_letters  # upper and lower
+        confirmation_code = ''.join(
+            random.sample(
+                letters,
+                User._meta.get_field('confirmation_code').max_length
+            )
+        )
+        if User.objects.filter(
+            username=request.data.get('username'),
+            email=request.data.get('email')
+        ).exists():
+            user = User.objects.get(
+                username=request.data.get('username')
             )
             send_mail(
                 'Your API code',          # topic
@@ -111,9 +117,21 @@ def register(request):
                 [request.data['email']],  # to
                 fail_silently=True,       # log error
             )
-            serializer.save(confirmation_code=confirmation_code)
+            user.confirmation_code = confirmation_code
+            user.save()
             return Response(request.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        send_mail(
+                'Your API code',          # topic
+                confirmation_code,        # text
+                'YamDB_API@yandex.ru',    # from
+                [request.data['email']],  # to
+                fail_silently=True,       # log error
+            )
+        serializer.save(confirmation_code=confirmation_code)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -123,10 +141,15 @@ def get_jwt_token(request):
         serializer = TokenSerializer(data=request.data)
         # get_object_or_404(User, username=request.data.get('username'))
         if not serializer.is_valid():
-            if User.objects.filter(username=request.data.get('username')).exists():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        user = get_object_or_404(User, username=request.data['username'])
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        get_object_or_404(User, username=request.data['username'])
+        if not validate_confirmation_code(request.data['confirmation_code']):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user = get_object_or_404(
+            User,
+            username=request.data['username'],
+            confirmation_code=request.data['confirmation_code']
+        )
         access = AccessToken.for_user(user)
         return Response(
             {'token': str(access)},

@@ -102,7 +102,10 @@ class SignUpSerializer(serializers.ModelSerializer):
     )
     email = serializers.EmailField(
         required=True,
-        max_length=254
+        max_length=254,
+        validators=[
+            UniqueValidator(User.objects.all()),
+        ]
     )
 
     class Meta:

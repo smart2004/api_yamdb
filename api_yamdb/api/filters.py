@@ -1,8 +1,5 @@
 from django_filters import rest_framework as filters
 from reviews.models import Title
-# from rest_framework import filters
-# from rest_framework import filters
-# from django_filters import FilterSet
 
 
 class TitlesFilter(filters.FilterSet):
@@ -15,7 +12,7 @@ class TitlesFilter(filters.FilterSet):
         lookup_expr='icontains'
     )
     genre = filters.CharFilter(
-        field_name = 'genre__slug',
+        field_name='genre__slug',
         lookup_expr='icontains'
     )
 

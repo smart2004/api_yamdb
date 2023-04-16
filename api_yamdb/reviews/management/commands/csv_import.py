@@ -10,7 +10,7 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
-    
+
     help = 'load data from csv'
 
     def handle(self, *args, **options):

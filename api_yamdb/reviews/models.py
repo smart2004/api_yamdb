@@ -13,7 +13,7 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
-    
+
     class Meta:
         ordering = ['name']
 
@@ -42,7 +42,7 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
-    
+
     class Meta:
         ordering = ['name']
 
@@ -52,7 +52,7 @@ class GenreTitle(models.Model):
         Title, on_delete=models.CASCADE)
     genre = models.ForeignKey(
         Genre, on_delete=models.CASCADE)
-    
+
     def __str__(self):
         return f'{self.title}, genre: {self.genre}'
 
@@ -63,14 +63,14 @@ class Review(models.Model):
         related_name='reviews')
     text = models.TextField()
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, 
+        User, on_delete=models.CASCADE,
         related_name='reviews')
     score = models.IntegerField(
         validators=[
             MinValueValidator(1),
             MaxValueValidator(10)
         ]
-        )
+    )
     pub_date = models.DateTimeField(
         'Publication date', auto_now=True)
 
@@ -79,19 +79,19 @@ class Review(models.Model):
         ordering = ['pub_date']
         constraints = [
             models.UniqueConstraint(
-            fields=('title', 'author',),
-            name='unique_review'
+                fields=('title', 'author',),
+                name='unique_review'
             )
         ]
 
 
 class Comment(models.Model):
     review = models.ForeignKey(
-        Review, on_delete=models.CASCADE, 
+        Review, on_delete=models.CASCADE,
         related_name='comments')
     text = models.TextField()
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, 
+        User, on_delete=models.CASCADE,
         related_name='comments')
     pub_date = models.DateTimeField('Publication date', auto_now_add=True)
 

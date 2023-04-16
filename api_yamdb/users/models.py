@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from reviews.validators import validate_username
 
-# Create your models here.
 
 class User(AbstractUser):
     ADMIN = 'admin'
@@ -32,12 +31,12 @@ class User(AbstractUser):
 
     @property
     def is_moderator(self):
-        return self.role == self.MODERATOR   
+        return self.role == self.MODERATOR
 
     @property
     def is_admin(self):
         return self.role == self.ADMIN
-    
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 

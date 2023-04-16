@@ -1,33 +1,31 @@
-
-from django.shortcuts import get_object_or_404, render
-import string
 import random
-from django.db.models import Avg
-from reviews.models import Category, Genre, Title, Review
-from api.serializers import CategorySerializer, GenreSerializer
-from api.mixins import ListCreateDestroyViewSet
-from api.serializers import(CategorySerializer, GenreSerializer,
-                            TitleSerializer, ReadOnlyTitleSerializer,
-                            ReviewSerializer, CommentSerializer)
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, permissions, status, viewsets
+import string
+
 from api.filters import TitlesFilter
-from api.permissions import (IsAdmin, IsAdminOrReadOnly,
-                          IsAdminModeratorOwnerOrReadOnly)
-from rest_framework.pagination import PageNumberPagination
-from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework import status  # статусы
-from rest_framework import generics
-from rest_framework.decorators import api_view, permission_classes, action  # декоратор
-from rest_framework.permissions import AllowAny, IsAuthenticated  # разрешения
-from rest_framework.response import Response
+from api.mixins import ListCreateDestroyViewSet
+from api.permissions import (IsAdmin, IsAdminModeratorOwnerOrReadOnly,
+                             IsAdminOrReadOnly)
+from api.serializers import (CategorySerializer, CommentSerializer,
+                             GenreSerializer, ReadOnlyTitleSerializer,
+                             ReviewSerializer, TitleSerializer)
 from django.core.mail import send_mail  # отправка сообщений
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status  # статусы
+from rest_framework import filters, permissions, viewsets
+from rest_framework.decorators import (action, api_view,  # декоратор
+                                       permission_classes)
+from rest_framework.permissions import AllowAny  # разрешения
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import AccessToken
+from reviews.models import Category, Genre, Review, Title
+from reviews.validators import validate_confirmation_code
 from users.models import User
-from .serializers import SignUpSerializer, TokenSerializer, UserSerializer
-# from .serializers import AboutUserSerializer, UserMeSerializer
-from .serializers import UserSerializer, UserEditSerializer
-from reviews.validators import validate_username, validate_confirmation_code
+
+from .serializers import (SignUpSerializer, TokenSerializer,
+                          UserEditSerializer, UserSerializer)
+
 
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
@@ -60,7 +58,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         if self.action in ("retrieve", "list"):
             return ReadOnlyTitleSerializer
         return TitleSerializer
- 
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
@@ -69,7 +67,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
         return title.reviews.all()
-    
+
     def perform_create(self, serializer):
         title_id = self.kwargs.get('title_id')
         title = get_object_or_404(Title, id=title_id)
@@ -83,7 +81,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
         return review.comments.all()
-    
+
     def perform_create(self, serializer):
         title_id = self.kwargs.get('title_id')
         review_id = self.kwargs.get('review_id')
@@ -122,14 +120,17 @@ def register(request):
             return Response(request.data, status=status.HTTP_200_OK)
 
         if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        send_mail(
-                'Your API code',          # topic
-                confirmation_code,        # text
-                'YamDB_API@yandex.ru',    # from
-                [request.data['email']],  # to
-                fail_silently=True,       # log error
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
             )
+        send_mail(
+            'Your API code',          # topic
+            confirmation_code,        # text
+            'YamDB_API@yandex.ru',    # from
+            [request.data['email']],  # to
+            fail_silently=True,       # log error
+        )
         serializer.save(confirmation_code=confirmation_code)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -139,9 +140,11 @@ def register(request):
 def get_jwt_token(request):
     if request.method == 'POST':
         serializer = TokenSerializer(data=request.data)
-        # get_object_or_404(User, username=request.data.get('username'))
         if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
         get_object_or_404(User, username=request.data.get('username'))
         if not validate_confirmation_code(request.data['confirmation_code']):
             return Response(status=status.HTTP_400_BAD_REQUEST)

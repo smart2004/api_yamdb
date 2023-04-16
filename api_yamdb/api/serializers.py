@@ -135,13 +135,20 @@ class UserSerializer(serializers.ModelSerializer):
         max_length=150,
         validators=[
             validate_username,
-            UniqueValidator(User.objects.all()),
+            UniqueValidator(queryset=User.objects.all()),
+        ]
+    )
+
+    email = serializers.EmailField(
+        max_length=254,
+        validators=[
+            UniqueValidator(queryset=User.objects.all())
         ]
     )
 
     class Meta:
         model = User
-        fields = (
+        fields = (       
             'username',
             'email',
             'first_name',
@@ -151,30 +158,10 @@ class UserSerializer(serializers.ModelSerializer):
             )
 
 
-class AboutUserSerializer(serializers.ModelSerializer):
-
+class UserEditSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = User
-        fields = (
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'bio',
-            'role'
-            )
-        lookup_field = 'username'
-
-
-class UserMeSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = User
-        fields = (
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'bio',
-            'role'
-            )
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'bio', 'role')
+        read_only_fields = ['role']

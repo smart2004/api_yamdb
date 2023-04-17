@@ -1,13 +1,11 @@
 from django.db import models
-# from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
-# from django.contrib.auth import get_user_model
 from .validators import validate_year
 from users.models import User
-# User=get_user_model
 
 
 class Category(models.Model):
+    """Категория произведения"""
     name = models.CharField(max_length=256)
     slug = models.SlugField(max_length=50, unique=True)
 
@@ -19,6 +17,7 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
+    """Жанр произведения"""
     name = models.CharField(max_length=256)
     slug = models.SlugField(max_length=50, unique=True)
 
@@ -30,6 +29,7 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
+    """Описание произведения"""
     name = models.CharField(max_length=256)
     year = models.IntegerField(validators=(validate_year,))
     description = models.TextField(null=True, blank=True)
@@ -48,6 +48,7 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
+    """Связь произведения с жанром"""
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE)
     genre = models.ForeignKey(
@@ -58,6 +59,7 @@ class GenreTitle(models.Model):
 
 
 class Review(models.Model):
+    """Отзывы к произведениям"""
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE,
         related_name='reviews')
@@ -65,7 +67,7 @@ class Review(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE,
         related_name='reviews')
-    score = models.IntegerField(
+    score = models.PositiveSmallIntegerField(
         validators=[
             MinValueValidator(1),
             MaxValueValidator(10)
@@ -76,7 +78,7 @@ class Review(models.Model):
 
     class Meta:
         default_related_name = 'reviews'
-        ordering = ['pub_date']
+        ordering = ['-pub_date']
         constraints = [
             models.UniqueConstraint(
                 fields=('title', 'author',),
@@ -86,6 +88,7 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
+    """Комменатрии к отзывам"""
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE,
         related_name='comments')

@@ -4,25 +4,25 @@ from rest_framework.validators import UniqueValidator
 from rest_framework.generics import get_object_or_404
 
 from reviews.models import Category, Genre, Title, Review, Comment, User
-from reviews.validators import validate_username
+from users.validators import validate_username
 
 
 class CategorySerializer(serializers.ModelSerializer):
-
+    """Сериализатор категорий"""
     class Meta:
         model = Category
         fields = ('name', 'slug')
 
 
 class GenreSerializer(serializers.ModelSerializer):
-
+    """Сериализатор жанров"""
     class Meta:
         model = Genre
         fields = ('name', 'slug')
 
 
 class TitleSerializer(serializers.ModelSerializer):
-
+    """Сериализатор произведений"""
     genre = serializers.SlugRelatedField(
         slug_field='slug', many=True, queryset=Genre.objects.all()
     )
@@ -44,6 +44,7 @@ class TitleSerializer(serializers.ModelSerializer):
 
 
 class ReadOnlyTitleSerializer(serializers.ModelSerializer):
+    """Сериализатор произведений только для чтения"""
     rating = serializers.IntegerField(
         source='reviews__score__avg', read_only=True
     )
@@ -63,11 +64,8 @@ class ReadOnlyTitleSerializer(serializers.ModelSerializer):
         )
 
 
-class GenreTitleSerializer(serializers.ModelSerializer):
-    pass
-
-
 class ReviewSerializer(serializers.ModelSerializer):
+    """Сериализатор отзывов"""
     title = serializers.SlugRelatedField(
         slug_field='name', read_only=True
     )
@@ -95,7 +93,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-
+    """Сериализатор комментариев"""
     review = serializers.SlugRelatedField(
         slug_field='text', read_only=True
     )
@@ -109,7 +107,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class SignUpSerializer(serializers.ModelSerializer):
-
+    """Сериализатор регистрации пользователей"""
     username = serializers.CharField(
         required=True,
         max_length=150,
@@ -132,7 +130,7 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 
 class TokenSerializer(serializers.ModelSerializer):
-
+    """Сериализатор токенов"""
     username = serializers.CharField(
         required=True,
         max_length=150,
@@ -141,7 +139,7 @@ class TokenSerializer(serializers.ModelSerializer):
     confirmation_code = serializers.CharField(
         required=True,
         max_length=20,
-        # validators=[validate_confirmation_code, ]
+        # validators=['validate_confirmation_code', ]
     )
 
     class Meta:

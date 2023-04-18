@@ -23,7 +23,7 @@ from users.validators import validate_confirmation_code
 from users.models import User
 
 from .serializers import (
-    SignUpSerializer, TokenSerializer, UserEditSerializer, UserSerializer
+    SignUpSerializer, TokenSerializer, UserSerializer
 )
 
 
@@ -171,7 +171,7 @@ class UserViewSet(viewsets.ModelViewSet):
         detail=False,
         url_path="me",
         permission_classes=[permissions.IsAuthenticated],
-        serializer_class=UserEditSerializer,
+        serializer_class=UserSerializer,
     )
     def users_own_profile(self, request):
         user = request.user
@@ -182,8 +182,8 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(
                 user,
                 data=request.data,
-                partial=True
+                partial=True,
             )
             serializer.is_valid(raise_exception=True)
-            serializer.save()
+            serializer.save(role=user.role, partial=True)
             return Response(serializer.data, status=status.HTTP_200_OK)

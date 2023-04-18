@@ -7,7 +7,8 @@ from api.permissions import (
 )
 from api.serializers import (
     CategorySerializer, CommentSerializer, GenreSerializer,
-    ReadOnlyTitleSerializer, ReviewSerializer, TitleSerializer
+    ReadOnlyTitleSerializer, ReviewSerializer, TitleSerializer,
+    SignUpSerializer, TokenSerializer, UserSerializer
 )
 from django.core.mail import send_mail
 from django.db.models import Avg
@@ -19,12 +20,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import Category, Genre, Review, Title
-# from users.validators import validate_confirmation_code
 from users.models import User
-
-from .serializers import (
-    SignUpSerializer, TokenSerializer, UserSerializer
-)
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
@@ -112,7 +108,6 @@ def register(request):
             email=request.data.get('email'),
             username=request.data.get('username')
         )
-#        user.confirmation_code = confirmation_code
         user.save()
         return Response(request.data, status=status.HTTP_200_OK)
 
@@ -124,7 +119,6 @@ def register(request):
         [request.data['email']],
         fail_silently=True,
     )
-#    serializer.save(confirmation_code=confirmation_code)
     serializer.save()
     return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -140,12 +134,10 @@ def get_jwt_token(request):
             status=status.HTTP_400_BAD_REQUEST
         )
     if get_object_or_404(User, username=request.data.get('username')):
-#    if validate_confirmation_code(request.data['confirmation_code']):
         return Response(status=status.HTTP_400_BAD_REQUEST)
     
     user = User.objects.get(
         username=request.data['username'],
-#        confirmation_code=request.data['confirmation_code']
     )
     access = AccessToken.for_user(user)
     return Response(

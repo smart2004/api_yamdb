@@ -23,45 +23,27 @@ The project has endpoints sections (with -requests | endpoints):
 
 ##### AUTH
 ```
-(POST | http://127.0.0.1:8000/api/v1/auth/signup/), 
+(POST | http://127.0.0.1:8000/api/v1/auth/signup/),
+***Request:***
+{
+  "email": "user@example.com",
+  "username": "string"
+}
+***Response:***
+{
+  "email": "string",
+  "username": "string"
+}
 (POST | http://127.0.0.1:8000/api/v1/auth/token/);
-```
-
-##### CATEGORIES 
-```
-(POST or GET | http://127.0.0.1:8000/api/v1/categories/), 
-(DELETE | http://127.0.0.1:8000/api/v1/categories/{slug}); 
-```
-
-##### GENRES 
-```
-(POST or GET | http://127.0.0.1:8000/api/v1/genres/), 
-(DELETE | http://127.0.0.1:8000/api/v1/genres/{slug});
-```
-
-##### TITLES 
-```
-(POST or GET | http://127.0.0.1:8000/api/v1/titles/), 
-(GET, PATCH, DELETE | http://127.0.0.1:8000/api/v1/titles/{titles_id}/);
-```
-
-##### REVIEWS 
-```
-(POST or GET | http://127.0.0.1:8000/api/v1/titles/{title_id}/reviews/), 
-(GET, PATCH, DELETE | http://127.0.0.1:8000/api/v1/titles/{title_id}/reviews/{review_id}/);
-```
-
-##### COMMENTS 
-```
-(POST or GET | http://127.0.0.1:8000/api/v1/titles/{title_id}/reviews/{review_id}/comments/),
-(GET, PATCH, DELETE | http://127.0.0.1:8000/api/v1/titles/{title_id}/reviews/{review_id}/comments/{comment_id}/);
-```
-
-##### USERS 
-```
-(POST or GET | http://127.0.0.1:8000/api/v1/users/), 
-(GET, PATCH, DELETE | http://127.0.0.1:8000/api/v1/users/{username}/),
-(GET, PATCH | http://127.0.0.1:8000/api/v1/users/me/)
+***Request:***
+{
+  "username": "string",
+  "confirmation_code": "string"
+}
+***Response:***
+{
+  "token": "string"
+}
 ```
 
 #### For further details please refer: http://127.0.0.1:8000/redoc/

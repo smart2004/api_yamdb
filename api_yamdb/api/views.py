@@ -19,7 +19,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import Category, Genre, Review, Title
-from users.validators import validate_confirmation_code
+# from users.validators import validate_confirmation_code
 from users.models import User
 
 from .serializers import (

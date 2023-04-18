@@ -3,7 +3,6 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 from rest_framework.generics import get_object_or_404
-# from api_yamdb.reviews.validators import validate_confirmation_code
 
 from reviews.models import Category, Genre, Title, Review, Comment, User
 from users.validators import validate_username, validate_confirmation_code
@@ -145,7 +144,7 @@ class TokenSerializer(serializers.ModelSerializer):
     confirmation_code = serializers.CharField(
         required=True,
         max_length=20,
-#        validators=[validate_confirmation_code, ]
+        validators=[validate_confirmation_code, ]
     )
 
 
@@ -182,12 +181,3 @@ class UserSerializer(serializers.ModelSerializer):
             'bio',
             'role'
         )
-
-
-#class UserEditSerializer(serializers.ModelSerializer):
-
-#    class Meta:
-#        model = User
-#        fields = ('username', 'email', 'first_name',
-#                  'last_name', 'bio', 'role')
-#        read_only_fields = ['role']

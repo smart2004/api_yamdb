@@ -112,7 +112,7 @@ def register(request):
             email=request.data.get('email'),
             username=request.data.get('username')
         )
-        user.confirmation_code = confirmation_code
+#        user.confirmation_code = confirmation_code
         user.save()
         return Response(request.data, status=status.HTTP_200_OK)
 
@@ -124,7 +124,8 @@ def register(request):
         [request.data['email']],
         fail_silently=True,
     )
-    serializer.save(confirmation_code=confirmation_code)
+#    serializer.save(confirmation_code=confirmation_code)
+    serializer.save()
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -138,12 +139,13 @@ def get_jwt_token(request):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
-    get_object_or_404(User, username=request.data.get('username'))
-    if validate_confirmation_code(request.data['confirmation_code']):
+    if get_object_or_404(User, username=request.data.get('username')):
+#    if validate_confirmation_code(request.data['confirmation_code']):
         return Response(status=status.HTTP_400_BAD_REQUEST)
+    
     user = User.objects.get(
         username=request.data['username'],
-        confirmation_code=request.data['confirmation_code']
+#        confirmation_code=request.data['confirmation_code']
     )
     access = AccessToken.for_user(user)
     return Response(

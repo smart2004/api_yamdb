@@ -145,7 +145,6 @@ class TokenSerializer(serializers.ModelSerializer):
         validators=[validate_confirmation_code, ]
     )
 
-
     class Meta:
         model = User
         fields = ('username', 'confirmation_code')

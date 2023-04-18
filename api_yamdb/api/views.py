@@ -135,7 +135,7 @@ def get_jwt_token(request):
         )
     if get_object_or_404(User, username=request.data.get('username')):
         return Response(status=status.HTTP_400_BAD_REQUEST)
-    
+
     user = User.objects.get(
         username=request.data['username'],
     )

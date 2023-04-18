@@ -9,4 +9,3 @@ def validate_year(value):
             ('Input year %(value)s greater than current year!'),
             params={'value': value},
         )
-

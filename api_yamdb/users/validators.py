@@ -16,3 +16,12 @@ def validate_username(username):
             'It is prohibited to set username as me'
         )
     return username
+
+
+def validate_confirmation_code(confirmation_code):
+    """Валидация кода подтверждения"""
+    if not isinstance(confirmation_code, str):
+        return True
+    if len(confirmation_code) != 20:
+        return True
+    return False

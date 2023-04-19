@@ -100,6 +100,7 @@ def register(request):
 
     serializer = SignUpSerializer(data=request.data)
     confirmation_code = uuid.uuid4().hex
+    
     if User.objects.filter(
         username=request.data.get('username'),
         email=request.data.get('email')
@@ -108,7 +109,6 @@ def register(request):
             email=request.data.get('email'),
             username=request.data.get('username')
         )
-        user.save()
         return Response(request.data, status=status.HTTP_200_OK)
 
     serializer.is_valid(raise_exception=True)
@@ -116,11 +116,11 @@ def register(request):
         'Your API code',
         confirmation_code,
         'YamDB_API@yandex.ru',
-        [request.data['email']],
+        [serializer.validated_data['email']],
         fail_silently=True,
     )
     serializer.save()
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -128,16 +128,14 @@ def register(request):
 def get_jwt_token(request):
     """Получение токена"""
     serializer = TokenSerializer(data=request.data)
-    if not serializer.is_valid():
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
-    if get_object_or_404(User, username=request.data.get('username')):
+    serializer.is_valid(raise_exception=True)
+
+    get_object_or_404(User, username=request.data.get('username'))
+    if serializer.validated_data['confirmation_code']:
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
     user = User.objects.get(
-        username=request.data['username'],
+        username=serializer.validated_data['username'],
     )
     access = AccessToken.for_user(user)
     return Response(
@@ -172,12 +170,12 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.method == "GET":
             serializer = self.get_serializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        if request.method == "PATCH":
-            serializer = self.get_serializer(
-                user,
-                data=request.data,
-                partial=True,
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save(role=user.role, partial=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        serializer = self.get_serializer(
+            user,
+            data=request.data,
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(role=user.role, partial=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

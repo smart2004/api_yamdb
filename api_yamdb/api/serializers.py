@@ -137,12 +137,12 @@ class TokenSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         required=True,
         max_length=150,
-        validators=[validate_username, ]
+        validators=[validate_username]
     )
     confirmation_code = serializers.CharField(
         required=True,
         max_length=20,
-        validators=[validate_confirmation_code, ]
+        validators=[validate_confirmation_code]
     )
 
     class Meta:

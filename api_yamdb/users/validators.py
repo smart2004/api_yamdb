@@ -20,8 +20,8 @@ def validate_username(username):
 
 def validate_confirmation_code(confirmation_code):
     """Валидация кода подтверждения"""
-    if not isinstance(confirmation_code, str):
-        return True
+    if isinstance(confirmation_code, str):
+        return ValidationError('used not str')
     if len(confirmation_code) != 20:
-        return True
-    return False
+        return ValidationError('confirmation_code length != 20 symbols')
+    return True

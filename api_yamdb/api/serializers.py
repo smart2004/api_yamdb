@@ -141,7 +141,6 @@ class TokenSerializer(serializers.ModelSerializer):
     )
     confirmation_code = serializers.CharField(
         required=True,
-        max_length=20,
         validators=[validate_confirmation_code]
     )
 

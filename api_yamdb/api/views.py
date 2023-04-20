@@ -129,7 +129,7 @@ def register(request):
         [serializer.validated_data['email']],
         fail_silently=True,
     )
-    serializer.save()
+    serializer.save(confirmation_code=confirmation_code)
     return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 
@@ -140,7 +140,7 @@ def get_jwt_token(request):
     serializer = TokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     username = serializer.validated_data.get('username')
-    confirmation_code = serializer.validated_data.get('username')
+    confirmation_code = serializer.validated_data.get('confirmation_code')
     user = get_object_or_404(
         User,
         username=username

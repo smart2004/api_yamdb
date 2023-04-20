@@ -100,15 +100,26 @@ def register(request):
 
     serializer = SignUpSerializer(data=request.data)
     confirmation_code = uuid.uuid4().hex
-    
+# Если пользователь найден,
+# то не требуется валидация (была проведена на этапе создания).
+# Просто присваиваем ему новый confirmation_code
     if User.objects.filter(
         username=request.data.get('username'),
         email=request.data.get('email')
-    ):
-        user, _ = User.objects.get_or_create(
-            email=request.data.get('email'),
-            username=request.data.get('username')
+    ).exists():
+        user = User.objects.get(
+            username=request.data.get('username'),
+            email=request.data.get('email')
         )
+        send_mail(
+            'Your API code',
+            confirmation_code,
+            'YamDB_API@yandex.ru',
+            [request.data.get('email')],
+            fail_silently=True,
+        )
+        user.confirmation_code = confirmation_code
+        user.save()
         return Response(request.data, status=status.HTTP_200_OK)
 
     serializer.is_valid(raise_exception=True)
@@ -134,8 +145,10 @@ def get_jwt_token(request):
     if serializer.validated_data['confirmation_code']:
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    user = User.objects.get(
+    user = get_object_or_404(
+        User,
         username=serializer.validated_data['username'],
+        confirmation_code=serializer.validated_data['confirmation_code']
     )
     access = AccessToken.for_user(user)
     return Response(

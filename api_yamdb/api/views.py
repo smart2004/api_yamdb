@@ -2,14 +2,13 @@ import uuid
 
 from api.filters import TitlesFilter
 from api.mixins import ListCreateDestroyViewSet
-from api.permissions import (
-    IsAdmin, IsAdminModeratorOwnerOrReadOnly, IsAdminOrReadOnly
-)
-from api.serializers import (
-    CategorySerializer, CommentSerializer, GenreSerializer,
-    ReadOnlyTitleSerializer, ReviewSerializer, TitleSerializer,
-    SignUpSerializer, TokenSerializer, UserSerializer
-)
+from api.permissions import (IsAdmin, IsAdminModeratorOwnerOrReadOnly,
+                             IsAdminOrReadOnly)
+from api.serializers import (CategorySerializer, CommentSerializer,
+                             GenreSerializer, ReadOnlyTitleSerializer,
+                             ReviewSerializer, SignUpSerializer,
+                             TitleSerializer, TokenSerializer, UserSerializer)
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -100,9 +99,9 @@ def register(request):
 
     serializer = SignUpSerializer(data=request.data)
     confirmation_code = uuid.uuid4().hex
-# Если пользователь найден,
-# то не требуется валидация (была проведена на этапе создания).
-# Просто присваиваем ему новый confirmation_code
+    # Если пользователь найден,
+    # то не требуется валидация (была проведена на этапе создания).
+    # Просто присваиваем ему новый confirmation_code
     if User.objects.filter(
         username=request.data.get('username'),
         email=request.data.get('email')
@@ -140,20 +139,20 @@ def get_jwt_token(request):
     """Получение токена"""
     serializer = TokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-
-    get_object_or_404(User, username=request.data.get('username'))
-    if serializer.validated_data['confirmation_code']:
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
+    username = serializer.validated_data.get('username')
+    confirmation_code = serializer.validated_data.get('username')
     user = get_object_or_404(
         User,
-        username=serializer.validated_data['username'],
-        confirmation_code=serializer.validated_data['confirmation_code']
+        username=username
     )
-    access = AccessToken.for_user(user)
+    if default_token_generator.check_token(user, confirmation_code):
+        access = AccessToken.for_user(user)
+        return Response(
+            {'token': str(access)},
+            status=status.HTTP_200_OK
+        )
     return Response(
-        {'token': str(access)},
-        status=status.HTTP_200_OK
+        status=status.HTTP_400_BAD_REQUEST
     )
 
 

@@ -16,11 +16,3 @@ def validate_username(username):
             'It is prohibited to set username as me'
         )
     return username
-
-
-def validate_confirmation_code(confirmation_code):
-    """Валидация кода подтверждения"""
-    if not isinstance(confirmation_code, str):
-        raise ValidationError('used not str')
-    if len(confirmation_code) != 32:
-        raise ValidationError('confirmation_code length != 32 symbols')

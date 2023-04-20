@@ -4,7 +4,7 @@ from rest_framework.validators import UniqueValidator
 from rest_framework.generics import get_object_or_404
 
 from reviews.models import Category, Genre, Title, Review, Comment, User
-from users.validators import validate_username, validate_confirmation_code
+from users.validators import validate_username
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -135,14 +135,10 @@ class SignUpSerializer(serializers.ModelSerializer):
 class TokenSerializer(serializers.ModelSerializer):
     """Сериализатор токенов"""
     username = serializers.CharField(
-        required=True,
-        max_length=150,
-        validators=[validate_username, ]
+        required=True
     )
     confirmation_code = serializers.CharField(
-        required=True,
-        max_length=20,
-        validators=[validate_confirmation_code, ]
+        required=True
     )
 
     class Meta:

@@ -1,4 +1,6 @@
 import uuid
+import random
+from string import digits
 from django.contrib.auth.tokens import default_token_generator
 from api.filters import TitlesFilter
 from api.mixins import ListCreateDestroyViewSet
@@ -100,27 +102,38 @@ def register(request):
 
     serializer = SignUpSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    confirmation_code = uuid.uuid4().hex
-    user.confirmation_code = confirmation_code   
+    serializer.save()
+    user = get_object_or_404(
+        User,
+        username=serializer.validated_data["username"]
+    )
+    confirmation_code = default_token_generator.make_token(user)
+#    confirmation_code = uuid.uuid4().hex
+#    user.confirmation_code = confirmation_code   
     
 #    if User.objects.filter(
 #        username=request.data.get('username'),
 #        email=request.data.get('email')
 #    ):
-    user, _ = User.objects.get_or_create(
-        email=request.data.get('email'),
-        username=request.data.get('username')
+    user, created = User.objects.get_or_create(
+        email=serializer.validated_data.get('email'),
+        username=serializer.validated_data.get('username')
     )
+    if created is False:
+        confirmation_code = ''.join(random.choices(digits, k=5))
+        user.confirmation_code = confirmation_code
+        user.save()
+
 #    return Response(request.data, status=status.HTTP_200_OK)
 
 #    serializer.is_valid(raise_exception=True)
-    send_mail(
-        'Your API code',
-        confirmation_code,
-        'YamDB_API@yandex.ru',
-        [serializer.validated_data['email']],
-        fail_silently=True,
-    )
+        send_mail(
+            'Your API code',
+            confirmation_code,
+            'YamDB_API@yandex.ru',
+            [serializer.validated_data['email']],
+            fail_silently=True,
+        )
     serializer.save()
     return Response(serializer.validated_data, status=status.HTTP_200_OK)
 

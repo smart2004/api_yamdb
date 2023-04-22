@@ -116,16 +116,25 @@ class SignUpSerializer(serializers.ModelSerializer):
         max_length=150,
         validators=[
             validate_username,
-            UniqueValidator(User.objects.all()),
         ]
     )
     email = serializers.EmailField(
         required=True,
-        max_length=254,
-        validators=[
-            UniqueValidator(User.objects.all()),
-        ]
+        max_length=254
     )
+
+    def validate(self, attrs):
+        # Других идей по реализации нет
+        if User.objects.filter(
+            username=attrs['username'],
+            email=attrs['email']
+        ).exists():
+            return attrs
+        if User.objects.filter(username=attrs['username']).exists():
+            raise serializers.ValidationError("Username exists")
+        if User.objects.filter(email=attrs['email']).exists():
+            raise serializers.ValidationError("Email exists")
+        return attrs
 
     class Meta:
         model = User
@@ -140,6 +149,19 @@ class TokenSerializer(serializers.ModelSerializer):
     confirmation_code = serializers.CharField(
         required=True
     )
+
+    def validate(self, attrs):
+        get_object_or_404(User, username=attrs['username'])
+        if len(attrs['confirmation_code']) != 32:
+            raise serializers.ValidationError("Confiramtion code length error")
+        if not User.objects.filter(
+            username=attrs['username'],
+            confirmation_code=attrs['confirmation_code']
+        ).exists():
+            raise serializers.ValidationError(
+                "This confirmation_code not found"
+            )
+        return attrs
 
     class Meta:
         model = User

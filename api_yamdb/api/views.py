@@ -8,7 +8,6 @@ from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReadOnlyTitleSerializer,
                              ReviewSerializer, SignUpSerializer,
                              TitleSerializer, TokenSerializer, UserSerializer)
-from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -96,41 +95,22 @@ class CommentViewSet(viewsets.ModelViewSet):
 @permission_classes([AllowAny])
 def register(request):
     """Обрабатывавает регистраницию новых пользователей"""
-
     serializer = SignUpSerializer(data=request.data)
     confirmation_code = uuid.uuid4().hex
-    # Если пользователь найден,
-    # то не требуется валидация (была проведена на этапе создания).
-    # Просто присваиваем ему новый confirmation_code
-    if User.objects.filter(
-        username=request.data.get('username'),
-        email=request.data.get('email')
-    ).exists():
-        user = User.objects.get(
-            username=request.data.get('username'),
-            email=request.data.get('email')
-        )
-        send_mail(
-            'Your API code',
-            confirmation_code,
-            'YamDB_API@yandex.ru',
-            [request.data.get('email')],
-            fail_silently=True,
-        )
-        user.confirmation_code = confirmation_code
-        user.save()
-        return Response(request.data, status=status.HTTP_200_OK)
-
     serializer.is_valid(raise_exception=True)
+    user, _ = User.objects.get_or_create(
+        **serializer.validated_data
+    )
     send_mail(
         'Your API code',
         confirmation_code,
         'YamDB_API@yandex.ru',
-        [serializer.validated_data['email']],
+        [request.data.get('email')],
         fail_silently=True,
     )
-    serializer.save(confirmation_code=confirmation_code)
-    return Response(serializer.validated_data, status=status.HTTP_200_OK)
+    user.confirmation_code = confirmation_code
+    user.save()
+    return Response(request.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -139,20 +119,13 @@ def get_jwt_token(request):
     """Получение токена"""
     serializer = TokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    username = serializer.validated_data.get('username')
-    confirmation_code = serializer.validated_data.get('confirmation_code')
-    user = get_object_or_404(
-        User,
-        username=username
+    user = User.objects.get(
+        **serializer.validated_data
     )
-    if default_token_generator.check_token(user, confirmation_code):
-        access = AccessToken.for_user(user)
-        return Response(
-            {'token': str(access)},
-            status=status.HTTP_200_OK
-        )
+    access = AccessToken.for_user(user)
     return Response(
-        status=status.HTTP_400_BAD_REQUEST
+        {'token': str(access)},
+        status=status.HTTP_200_OK
     )
 
 

@@ -1,5 +1,5 @@
 import uuid
-
+from django.contrib.auth.tokens import default_token_generator
 from api.filters import TitlesFilter
 from api.mixins import ListCreateDestroyViewSet
 from api.permissions import (
